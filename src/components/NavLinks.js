@@ -1,11 +1,8 @@
 import React from "react";
 import links from "../utils/links";
 import { NavLink } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { toggleSidebar } from "../features/user/userSlicer";
 
-const NavLinks = () => {
-  const dispatch = useDispatch();
+const NavLinks = ({ toggleSidebar }) => {
   return (
     <div className="nav-links">
       {links.map((link) => {
@@ -17,7 +14,7 @@ const NavLinks = () => {
             className={({ isActive }) => {
               return isActive ? "nav-link active" : "nav-link";
             }}
-            onClick={() => dispatch(toggleSidebar())}
+            onClick={toggleSidebar}
             end
           >
             <span className="icon">{icon}</span>

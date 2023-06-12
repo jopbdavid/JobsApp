@@ -16,7 +16,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    dispatch(logoutUser());
+    dispatch(logoutUser("Logging out..."));
     setToggle(false);
   };
 

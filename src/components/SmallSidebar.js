@@ -10,6 +10,9 @@ import NavLinks from "./NavLinks";
 const SmallSidebar = () => {
   const { isSidebarOpen } = useSelector((store) => store.user);
   const dispatch = useDispatch();
+  const handleSidebar = () => {
+    dispatch(toggleSidebar());
+  };
   return (
     <Wrapper>
       <div
@@ -18,16 +21,13 @@ const SmallSidebar = () => {
         }
       >
         <div className="content">
-          <button
-            className="close-btn"
-            onClick={() => dispatch(toggleSidebar())}
-          >
+          <button className="close-btn" onClick={handleSidebar}>
             <FaTimes />
           </button>
           <header>
             <Logo />
           </header>
-          <NavLinks />
+          <NavLinks toggleSidebar={handleSidebar} />
         </div>
       </div>
     </Wrapper>
