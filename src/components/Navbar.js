@@ -3,7 +3,7 @@ import Wrapper from "../assets/wrappers/Navbar";
 import { FaAlignLeft, FaUserCircle, FaCaretDown } from "react-icons/fa";
 import Logo from "./Logo";
 import { useSelector, useDispatch } from "react-redux";
-import { logoutUser, toggleSidebar } from "../features/user/userSlicer";
+import { clearStore, toggleSidebar } from "../features/user/userSlicer";
 
 const Navbar = () => {
   const [toggle, setToggle] = useState(false);
@@ -16,7 +16,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    dispatch(logoutUser("Logging out..."));
+    dispatch(clearStore("Logging out..."));
     setToggle(false);
   };
 
