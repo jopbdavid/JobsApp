@@ -4,6 +4,7 @@ import { clearStore } from "../features/user/userSlicer";
 
 const customFetch = axios.create({
   baseURL: "https://jobify-prod.herokuapp.com/api/v1/toolkit",
+  //mudar baseURL: "/api/v1"
 });
 
 customFetch.interceptors.request.use((config) => {
