@@ -1,69 +1,107 @@
-const Job = require('../models/Job')
-const { StatusCodes } = require('http-status-codes')
-const { BadRequestError, NotFoundError } = require('../errors')
+const Job = require("../models/Job");
+const { StatusCodes } = require("http-status-codes");
+const { BadRequestError, NotFoundError } = require("../errors");
 
 const getAllJobs = async (req, res) => {
-  const jobs = await Job.find({ createdBy: req.user.userId }).sort('createdAt')
-  res.status(StatusCodes.OK).json({ jobs, count: jobs.length })
-}
+  const { search, status, jobType, sort } = req.query;
+
+  let queryObj = { createdBy: req.user.userId };
+
+  if (status && status !== "all") {
+    queryObj.status = status;
+  }
+  if (jobType && jobType !== "all") {
+    queryObj.jobType = jobType;
+  }
+  if (search) {
+    queryObj.position = { $regex: search, $options: "i" };
+  }
+
+  let result = Job.find(queryObj);
+
+  if (sort && sort === "oldest") {
+    result = result.sort("createdAt");
+  }
+  if (sort && sort === "latest") {
+    result = result.sort("-createdAt");
+  }
+  if (sort && sort === "a-z") {
+    result = result.sort("position");
+  }
+
+  if (sort && sort === "z-a") {
+    result = result.sort("-position");
+  }
+
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  result = result.skip(skip).limit(limit);
+
+  const jobs = await result;
+  const totalJobs = await Job.countDocuments(queryObj);
+  const numOfPages = Math.ceil(totalJobs / limit);
+  res.status(StatusCodes.OK).json({ jobs, totalJobs, numOfPages });
+};
 const getJob = async (req, res) => {
   const {
     user: { userId },
     params: { id: jobId },
-  } = req
+  } = req;
 
   const job = await Job.findOne({
     _id: jobId,
     createdBy: userId,
-  })
+  });
   if (!job) {
-    throw new NotFoundError(`No job with id ${jobId}`)
+    throw new NotFoundError(`No job with id ${jobId}`);
   }
-  res.status(StatusCodes.OK).json({ job })
-}
+  res.status(StatusCodes.OK).json({ job });
+};
 
 const createJob = async (req, res) => {
-  req.body.createdBy = req.user.userId
-  const job = await Job.create(req.body)
-  res.status(StatusCodes.CREATED).json({ job })
-}
+  req.body.createdBy = req.user.userId;
+  const job = await Job.create(req.body);
+  res.status(StatusCodes.CREATED).json({ job });
+};
 
 const updateJob = async (req, res) => {
   const {
     body: { company, position },
     user: { userId },
     params: { id: jobId },
-  } = req
+  } = req;
 
-  if (company === '' || position === '') {
-    throw new BadRequestError('Company or Position fields cannot be empty')
+  if (company === "" || position === "") {
+    throw new BadRequestError("Company or Position fields cannot be empty");
   }
   const job = await Job.findByIdAndUpdate(
     { _id: jobId, createdBy: userId },
     req.body,
     { new: true, runValidators: true }
-  )
+  );
   if (!job) {
-    throw new NotFoundError(`No job with id ${jobId}`)
+    throw new NotFoundError(`No job with id ${jobId}`);
   }
-  res.status(StatusCodes.OK).json({ job })
-}
+  res.status(StatusCodes.OK).json({ job });
+};
 
 const deleteJob = async (req, res) => {
   const {
     user: { userId },
     params: { id: jobId },
-  } = req
+  } = req;
 
   const job = await Job.findByIdAndRemove({
     _id: jobId,
     createdBy: userId,
-  })
+  });
   if (!job) {
-    throw new NotFoundError(`No job with id ${jobId}`)
+    throw new NotFoundError(`No job with id ${jobId}`);
   }
-  res.status(StatusCodes.OK).send()
-}
+  res.status(StatusCodes.OK).send();
+};
 
 module.exports = {
   createJob,
@@ -71,4 +109,4 @@ module.exports = {
   getAllJobs,
   updateJob,
   getJob,
-}
+};
